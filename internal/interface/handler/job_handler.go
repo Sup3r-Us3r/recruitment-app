@@ -22,6 +22,19 @@ func NewJobHandler(createJobUC *job.CreateJobUseCase, searchJobUC *job.SearchJob
 	}
 }
 
+// Create godoc
+// @Summary Create a new job
+// @Description Creates a new job posting associated with the authenticated user
+// @Tags jobs
+// @Accept json
+// @Produce json
+// @Param request body job.CreateJobInput true "Job Creation Payload"
+// @Security ApiKeyAuth
+// @Success 201 {object} JobResponse
+// @Failure 400 {object} map[string]string "Invalid input"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/jobs [post]
 func (h *JobHandler) Create(c *gin.Context) {
 	var input job.CreateJobInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -60,6 +73,15 @@ func (h *JobHandler) Create(c *gin.Context) {
 	})
 }
 
+// List godoc
+// @Summary List all jobs
+// @Description Retrieve a list of all jobs, optionally filtered by a search query
+// @Tags jobs
+// @Produce json
+// @Param search query string false "Search query to filter jobs by title or description"
+// @Success 200 {array} JobResponse
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/jobs [get]
 func (h *JobHandler) List(c *gin.Context) {
 	searchQuery := c.Query("search")
 	res, err := h.searchJobUC.Execute(c.Request.Context(), searchQuery)
@@ -84,6 +106,16 @@ func (h *JobHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// ListMine godoc
+// @Summary List my jobs
+// @Description Retrieve a list of all jobs created by the authenticated user
+// @Tags jobs
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {array} JobResponse
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/jobs/mine [get]
 func (h *JobHandler) ListMine(c *gin.Context) {
 	// Extrai userID do contexto
 	userIDRaw, exists := c.Get("userID")

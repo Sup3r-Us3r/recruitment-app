@@ -6,6 +6,7 @@ import (
 	"recruitment/internal/interface/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/watchakorn-18k/scalar-go"
 )
 
 func SetupRouter(
@@ -15,6 +16,27 @@ func SetupRouter(
 	jwtService auth.JWTService,
 ) *gin.Engine {
 	r := gin.Default()
+
+	// Expose swagger.json for Scalar to fetch
+	r.StaticFile("/docs/swagger.json", "./docs/swagger.json")
+
+	// Scalar API Reference
+	r.GET("/docs", func(c *gin.Context) {
+		htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
+			SpecURL: "./docs/swagger.json",
+			CustomOptions: scalar.CustomOptions{
+				PageTitle: "Recruitment API",
+			},
+			DarkMode: true,
+		})
+
+		if err != nil {
+			c.String(500, "Failed to generate documentation")
+			return
+		}
+
+		c.Data(200, "text/html; charset=utf-8", []byte(htmlContent))
+	})
 
 	v1 := r.Group("/api/v1")
 

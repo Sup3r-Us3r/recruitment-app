@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	_ "recruitment/docs" // Swagger docs
 	"recruitment/internal/infrastructure/auth"
 	"recruitment/internal/infrastructure/database"
 	"recruitment/internal/infrastructure/repository"
@@ -16,6 +17,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// @title Recruitment API
+// @version 1.0
+// @description REST API for Recruitment and Selection system
+// @host localhost:8080
+// @BasePath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")

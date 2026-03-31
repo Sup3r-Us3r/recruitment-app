@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	domainErrs "recruitment/internal/domain/errors"
 	"recruitment/internal/usecase/application"
@@ -16,6 +17,33 @@ type ApplicationHandler struct {
 	listAppUC *application.ListMyApplicationsUseCase
 }
 
+// UserResponse represents the user data in applications.
+type UserResponse struct {
+	ID        uint      `json:"id"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// JobResponse represents the job data in applications.
+type JobResponse struct {
+	ID          uint      `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Location    string    `json:"location"`
+	OwnerID     uint      `json:"owner_id"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// ApplicationResponse represents a single application.
+type ApplicationResponse struct {
+	ID        uint          `json:"id"`
+	JobID     uint          `json:"job_id"`
+	UserID    uint          `json:"user_id"`
+	Job       *JobResponse  `json:"job,omitempty"`
+	User      *UserResponse `json:"user,omitempty"`
+	CreatedAt time.Time     `json:"created_at"`
+}
+
 func NewApplicationHandler(applyUC *application.ApplyUseCase, listAppUC *application.ListMyApplicationsUseCase) *ApplicationHandler {
 	return &ApplicationHandler{
 		applyUC:   applyUC,
@@ -23,6 +51,22 @@ func NewApplicationHandler(applyUC *application.ApplyUseCase, listAppUC *applica
 	}
 }
 
+// Apply godoc
+// @Summary Apply to a Job
+// @Description Allows the authenticated user to apply to a specific job
+// @Tags applications
+// @Accept json
+// @Produce json
+// @Param id path string true "Job ID"
+// @Security ApiKeyAuth
+// @Success 201 {object} ApplicationResponse
+// @Failure 400 {object} map[string]string "Invalid job ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Job not found"
+// @Failure 409 {object} map[string]string "Duplicate application"
+// @Failure 422 {object} map[string]string "Cannot apply to own job"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/jobs/{id}/apply [post]
 func (h *ApplicationHandler) Apply(c *gin.Context) {
 	jobIDParam := c.Param("id")
 	jobID, err := strconv.ParseUint(jobIDParam, 10, 32)
@@ -63,6 +107,16 @@ func (h *ApplicationHandler) Apply(c *gin.Context) {
 	})
 }
 
+// ListMine godoc
+// @Summary List my applications
+// @Description Retrieve a list of all jobs the authenticated user has applied for
+// @Tags applications
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {array} ApplicationResponse
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/applications/mine [get]
 func (h *ApplicationHandler) ListMine(c *gin.Context) {
 	userIDRaw, exists := c.Get("userID")
 	if !exists {
@@ -78,14 +132,35 @@ func (h *ApplicationHandler) ListMine(c *gin.Context) {
 		return
 	}
 
-	output := make([]gin.H, 0)
+	output := make([]ApplicationResponse, 0, len(res))
 	for _, a := range res {
-		output = append(output, gin.H{
-			"id":         a.ID,
-			"job_id":     a.JobID,
-			"user_id":    a.UserID,
-			"created_at": a.CreatedAt,
-		})
+		appRes := ApplicationResponse{
+			ID:        a.ID,
+			JobID:     a.JobID,
+			UserID:    a.UserID,
+			CreatedAt: a.CreatedAt,
+		}
+
+		if a.Job != nil {
+			appRes.Job = &JobResponse{
+				ID:          a.Job.ID,
+				Title:       a.Job.Title,
+				Description: a.Job.Description,
+				Location:    a.Job.Location,
+				OwnerID:     a.Job.OwnerID,
+				CreatedAt:   a.Job.CreatedAt,
+			}
+		}
+
+		if a.User != nil {
+			appRes.User = &UserResponse{
+				ID:        a.User.ID,
+				Email:     a.User.Email,
+				CreatedAt: a.User.CreatedAt,
+			}
+		}
+
+		output = append(output, appRes)
 	}
 
 	c.JSON(http.StatusOK, output)

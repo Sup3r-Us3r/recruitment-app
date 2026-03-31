@@ -22,12 +22,33 @@ func NewApplicationRepository(db *gorm.DB) repository.ApplicationRepository {
 }
 
 func toApplicationEntity(m model.ApplicationModel) entity.Application {
-	return entity.Application{
+	app := entity.Application{
 		ID:        m.ID,
 		JobID:     m.JobID,
 		UserID:    m.UserID,
 		CreatedAt: m.CreatedAt,
 	}
+
+	if m.Job.ID != 0 {
+		app.Job = &entity.Job{
+			ID:          m.Job.ID,
+			Title:       m.Job.Title,
+			Description: m.Job.Description,
+			Location:    m.Job.Location,
+			OwnerID:     m.Job.OwnerID,
+			CreatedAt:   m.Job.CreatedAt,
+		}
+	}
+
+	if m.User.ID != 0 {
+		app.User = &entity.User{
+			ID:        m.User.ID,
+			Email:     m.User.Email,
+			CreatedAt: m.User.CreatedAt,
+		}
+	}
+
+	return app
 }
 
 func toApplicationModel(e *entity.Application) *model.ApplicationModel {
@@ -57,7 +78,7 @@ func (r *applicationRepositoryImpl) Apply(ctx context.Context, application *enti
 
 func (r *applicationRepositoryImpl) ListByUserID(ctx context.Context, userID uint) ([]entity.Application, error) {
 	var models []model.ApplicationModel
-	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).Order("created_at desc").Find(&models).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Job").Preload("User").Where("user_id = ?", userID).Order("created_at desc").Find(&models).Error; err != nil {
 		return nil, err
 	}
 
