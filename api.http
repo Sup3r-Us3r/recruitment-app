@@ -1,0 +1,104 @@
+@baseUrl = http://localhost:8080/api/v1
+# Substitua esse valor pelo token gerado no login
+@recruitmentAuthToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NzUwNzk2ODAsImlhdCI6MTc3NDk5MzI4MH0.GwW06mbANCQb0wwYOt9iSPYNHeDTBcGA03jcVzJJmFo
+@candidateAuthToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE3NzUwODAxMDUsImlhdCI6MTc3NDk5MzcwNX0.UKweD8T7Hyo7HqaVbZ8mP_Z9PHpi8Avjp1ua9OIz8UI
+
+###
+# ==========================================
+# AUTH
+# ==========================================
+
+### Cadastrar Usuário 1 (Dono da Vaga)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "recrutador@empresa.com",
+  "password": "password123"
+}
+
+###
+
+### Login do Usuário 1
+# @name loginRecrutador
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "recrutador@empresa.com",
+  "password": "password123"
+}
+
+###
+
+### Cadastrar Usuário 2 (Candidato)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "candidato@email.com",
+  "password": "password123"
+}
+
+###
+
+### Login do Usuário 2
+# @name loginCandidato
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "candidato@email.com",
+  "password": "password123"
+}
+
+###
+# ==========================================
+# VAGAS (JOBS)
+# ==========================================
+
+### Listar Todas as Vagas (Público)
+GET {{baseUrl}}/jobs
+
+###
+
+### Buscar Vagas por Termo (Público)
+GET {{baseUrl}}/jobs?search=golang
+
+###
+
+### Criar uma Vaga
+# Header deve ter o token do recrutador
+POST {{baseUrl}}/jobs
+Authorization: Bearer {{recruitmentAuthToken}}
+Content-Type: application/json
+
+{
+  "title": "Desenvolvedor Go Sênior",
+  "description": "Vaga para desenvolvedor backend com foco em Go, Clean Architecture e TDD.",
+  "location": "Remoto"
+}
+
+###
+
+### Listar Vagas que Eu Criei (Dono deve ser o recrutador logado)
+GET {{baseUrl}}/jobs/mine
+Authorization: Bearer {{recruitmentAuthToken}}
+
+###
+# ==========================================
+# CANDIDATURAS (APPLICATIONS)
+# ==========================================
+
+### Candidatar-se a uma Vaga
+# Substitua o id (no caso, 1) pelo ID da vaga existente
+# Header deve ter o token do candidato 
+POST {{baseUrl}}/jobs/1/apply
+Authorization: Bearer {{candidateAuthToken}}
+
+###
+
+### Minhas Candidaturas
+# Header deve ter o token do candidato (lista as aplicações que fiz)
+GET {{baseUrl}}/applications/mine
+Authorization: Bearer {{candidateAuthToken}}
