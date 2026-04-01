@@ -1,23 +1,17 @@
-import { Link } from 'react-router-dom';
-import { useNavbar } from './hooks/use-navbar';
-import { NavLinks } from './components/nav-links';
-import { UserMenu } from './components/user-menu';
-import { MobileMenu } from './components/mobile-menu';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { MobileMenu } from './components/mobile-menu';
+import { NavLinks } from './components/nav-links';
+import { useNavbar } from './hooks/use-navbar';
 
 const Navbar = () => {
-  const {
-    isAuthenticated,
-    user,
-    logout,
-    isMobileMenuOpen,
-    setIsMobileMenuOpen,
-  } = useNavbar();
+  const { isAuthenticated, logout, isMobileMenuOpen, setIsMobileMenuOpen } =
+    useNavbar();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 leading-tight">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex flex-1 items-center gap-6">
           <MobileMenu
             isOpen={isMobileMenuOpen}
             onOpenChange={setIsMobileMenuOpen}
@@ -32,9 +26,7 @@ const Navbar = () => {
 
         <div className="flex items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
-            {isAuthenticated ? (
-              <UserMenu user={user} onLogout={logout} />
-            ) : (
+            {!isAuthenticated && (
               <div className="hidden md:flex gap-2">
                 <Button variant="ghost" asChild>
                   <Link to="/login">Entrar</Link>

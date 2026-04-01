@@ -1,8 +1,7 @@
 import { Navbar } from '@/components/navbar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MyJobs } from './components/my-jobs';
-import { MyApplications } from './components/my-applications';
 import { useAuth } from '@/contexts/auth-context';
+import { MyApplications } from './components/my-applications';
+import { MyJobs } from './components/my-jobs';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -22,35 +21,8 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <Tabs
-            defaultValue={isRecruiter ? 'jobs' : 'applications'}
-            className="w-full"
-          >
-            <TabsList
-              className={`grid w-full max-w-md ${isRecruiter ? 'grid-cols-1' : 'grid-cols-1'}`}
-            >
-              {!isRecruiter && (
-                <TabsTrigger value="applications">
-                  Minhas Candidaturas
-                </TabsTrigger>
-              )}
-              {isRecruiter && (
-                <TabsTrigger value="jobs">Minhas Vagas</TabsTrigger>
-              )}
-            </TabsList>
-
-            {!isRecruiter && (
-              <TabsContent value="applications" className="min-h-100">
-                <MyApplications />
-              </TabsContent>
-            )}
-
-            {isRecruiter && (
-              <TabsContent value="jobs" className="min-h-100">
-                <MyJobs />
-              </TabsContent>
-            )}
-          </Tabs>
+          {!isRecruiter && <MyApplications />}
+          {isRecruiter && <MyJobs />}
         </div>
       </main>
     </div>

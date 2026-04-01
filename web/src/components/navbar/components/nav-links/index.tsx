@@ -7,7 +7,7 @@ interface NavLinksProps {
 
 const NavLinks = ({ isAuthenticated, onLogout }: NavLinksProps) => {
   return (
-    <div className="hidden md:flex gap-6 items-center">
+    <div className="hidden md:flex flex-1 gap-6 items-center">
       <Link
         to="/jobs"
         className="text-sm font-medium transition-colors hover:text-primary"
@@ -24,7 +24,7 @@ const NavLinks = ({ isAuthenticated, onLogout }: NavLinksProps) => {
           </Link>
           <button
             type="button"
-            className="text-sm font-medium transition-colors hover:text-primary"
+            className="text-sm font-medium transition-colors ml-auto hover:text-primary cursor-pointer"
             onClick={onLogout}
           >
             Sair

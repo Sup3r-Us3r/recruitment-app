@@ -37,7 +37,7 @@ const JobCard = ({ job, initialHasApplied = false }: JobCardProps) => {
           </CardTitle>
           <Badge
             variant="secondary"
-            className="flex items-center gap-1 shrink-0 bg-primary/10 text-primary hover:bg-primary/20"
+            className="flex items-center gap-1 shrink-0 bg-primary/10 text-primary"
           >
             <MapPin className="h-3 w-3" />
             {job.location}
@@ -45,10 +45,11 @@ const JobCard = ({ job, initialHasApplied = false }: JobCardProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-4">
+      <CardContent className="flex flex-1 flex-col justify-between gap-4">
         <p className="text-muted-foreground text-sm line-clamp-3 text-pretty">
           {job.description}
         </p>
+
         <div className="flex items-center text-xs text-muted-foreground gap-1">
           <Clock className="h-3 w-3" />
           <span>Publicado em {formattedDate}</span>
@@ -79,7 +80,7 @@ const JobCard = ({ job, initialHasApplied = false }: JobCardProps) => {
           </Badge>
         ) : (
           <Button
-            className="w-full transition-all duration-200"
+            className="w-full transition-all duration-200 cursor-pointer"
             onClick={handleApply}
             disabled={isApplying}
           >

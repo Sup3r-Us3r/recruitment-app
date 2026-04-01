@@ -70,7 +70,7 @@ const MyApplications = () => {
                 <span>Candidatou-se em {formattedDate}</span>
               </div>
             </CardContent>
-            <CardFooter className="mt-2 pt-2">
+            <CardFooter>
               <Button asChild variant="outline" className="w-full text-xs h-8">
                 <Link to="/jobs">
                   <ExternalLink className="mr-2 h-3 w-3" />
