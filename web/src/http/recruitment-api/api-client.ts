@@ -1,26 +1,35 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
-})
+});
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('@recruitment:token')
+  const token = localStorage.getItem('@recruitment:token');
   if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('@recruitment:token')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
-  }
-)
+      localStorage.removeItem('@recruitment:token');
+      delete apiClient.defaults.headers.common.Authorization;
 
-export { apiClient }
+      const requestUrl = String(error.config?.url ?? '');
+      const isAuthEndpoint =
+        requestUrl.includes('/auth/login') ||
+        requestUrl.includes('/auth/register');
+
+      if (!isAuthEndpoint && window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+export { apiClient };

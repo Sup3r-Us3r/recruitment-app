@@ -1,18 +1,31 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '@/contexts/auth-context'
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@/contexts/auth-context';
+import type { UserRole } from '@/http/recruitment-api/auth/types';
 
-const ProtectedRoute = () => {
-  const { isAuthenticated, isLoading } = useAuth()
+interface ProtectedRouteProps {
+  allowedRoles?: UserRole[];
+}
+
+const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Carregando...
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />
-}
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-export { ProtectedRoute }
+  return <Outlet />;
+};
+
+export { ProtectedRoute };

@@ -1,11 +1,18 @@
-import { useRegister } from './hooks/use-register'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { AlertCircle } from 'lucide-react'
+import { useRegister } from './hooks/use-register';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { AlertCircle } from 'lucide-react';
 
 const RegisterForm = () => {
-  const { form, isLoading, onSubmit, errorMsg } = useRegister()
+  const { form, isLoading, onSubmit, errorMsg } = useRegister();
 
   return (
     <Form {...form}>
@@ -59,12 +66,45 @@ const RegisterForm = () => {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de conta</FormLabel>
+              <FormControl>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant={
+                      field.value === 'candidate' ? 'default' : 'outline'
+                    }
+                    onClick={() => field.onChange('candidate')}
+                  >
+                    Candidato
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={
+                      field.value === 'recruiter' ? 'default' : 'outline'
+                    }
+                    onClick={() => field.onChange('recruiter')}
+                  >
+                    Recrutador
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Criando conta...' : 'Criar Conta'}
         </Button>
       </form>
     </Form>
-  )
-}
+  );
+};
 
-export { RegisterForm }
+export { RegisterForm };
