@@ -20,6 +20,7 @@ type UserHandler struct {
 type RegisterResponse struct {
 	ID        uint      `json:"id"`
 	Email     string    `json:"email"`
+	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -54,6 +55,8 @@ func (h *UserHandler) Register(c *gin.Context) {
 		statusCode := http.StatusInternalServerError
 		if errors.Is(err, domainErrs.ErrEmailAlreadyExists) {
 			statusCode = http.StatusConflict
+		} else if errors.Is(err, domainErrs.ErrInvalidRole) {
+			statusCode = http.StatusBadRequest
 		} else if err.Error() == "password must be at least 6 characters" { // Simplified domain check mapping
 			statusCode = http.StatusBadRequest
 		}
@@ -65,6 +68,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"id":         res.ID,
 		"email":      res.Email,
+		"role":       res.Role,
 		"created_at": res.CreatedAt,
 	})
 }

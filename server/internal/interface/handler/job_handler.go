@@ -3,6 +3,8 @@ package handler
 import (
 	"net/http"
 
+	"recruitment/internal/domain/entity"
+	domainErrs "recruitment/internal/domain/errors"
 	"recruitment/internal/usecase/job"
 
 	"github.com/gin-gonic/gin"
@@ -52,6 +54,18 @@ func (h *JobHandler) Create(c *gin.Context) {
 	userID, ok := userIDRaw.(uint)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user context"})
+		return
+	}
+
+	userRoleRaw, exists := c.Get("userRole")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userRole, ok := userRoleRaw.(entity.UserRole)
+	if !ok || userRole != entity.RoleRecruiter {
+		c.JSON(http.StatusForbidden, gin.H{"error": domainErrs.ErrForbidden.Error()})
 		return
 	}
 
@@ -125,6 +139,18 @@ func (h *JobHandler) ListMine(c *gin.Context) {
 	}
 
 	userID := userIDRaw.(uint)
+
+	userRoleRaw, exists := c.Get("userRole")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userRole, ok := userRoleRaw.(entity.UserRole)
+	if !ok || userRole != entity.RoleRecruiter {
+		c.JSON(http.StatusForbidden, gin.H{"error": domainErrs.ErrForbidden.Error()})
+		return
+	}
 
 	res, err := h.listJobsUC.Execute(c.Request.Context(), userID)
 	if err != nil {

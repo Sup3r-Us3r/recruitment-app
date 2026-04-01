@@ -4,12 +4,14 @@ import (
 	"errors"
 	"time"
 
+	"recruitment/internal/domain/entity"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWTService interface {
-	GenerateToken(userID uint) (string, error)
-	ValidateToken(tokenString string) (uint, error)
+	GenerateToken(userID uint, email string, role entity.UserRole) (string, error)
+	ValidateToken(tokenString string) (*AuthClaims, error)
 }
 
 type jwtService struct {
@@ -23,13 +25,23 @@ func NewJWTService(secret string) JWTService {
 }
 
 type authClaims struct {
-	UserID uint `json:"user_id"`
+	UserID uint   `json:"user_id"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func (j *jwtService) GenerateToken(userID uint) (string, error) {
+type AuthClaims struct {
+	UserID uint
+	Email  string
+	Role   entity.UserRole
+}
+
+func (j *jwtService) GenerateToken(userID uint, email string, role entity.UserRole) (string, error) {
 	claims := &authClaims{
 		UserID: userID,
+		Email:  email,
+		Role:   string(role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -40,7 +52,7 @@ func (j *jwtService) GenerateToken(userID uint) (string, error) {
 	return token.SignedString(j.secretKey)
 }
 
-func (j *jwtService) ValidateToken(tokenString string) (uint, error) {
+func (j *jwtService) ValidateToken(tokenString string) (*AuthClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &authClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
@@ -49,12 +61,16 @@ func (j *jwtService) ValidateToken(tokenString string) (uint, error) {
 	})
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	if claims, ok := token.Claims.(*authClaims); ok && token.Valid {
-		return claims.UserID, nil
+		return &AuthClaims{
+			UserID: claims.UserID,
+			Email:  claims.Email,
+			Role:   entity.UserRole(claims.Role),
+		}, nil
 	}
 
-	return 0, errors.New("invalid token")
+	return nil, errors.New("invalid token")
 }

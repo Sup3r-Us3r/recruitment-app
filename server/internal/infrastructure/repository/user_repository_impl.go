@@ -26,6 +26,7 @@ func toUserEntity(m model.UserModel) *entity.User {
 		ID:           m.ID,
 		Email:        m.Email,
 		PasswordHash: m.PasswordHash,
+		Role:         entity.UserRole(m.Role),
 		CreatedAt:    m.CreatedAt,
 	}
 }
@@ -34,6 +35,7 @@ func toUserModel(e *entity.User) *model.UserModel {
 	m := &model.UserModel{
 		Email:        e.Email,
 		PasswordHash: e.PasswordHash,
+		Role:         string(e.Role),
 	}
 	m.ID = e.ID
 	m.CreatedAt = e.CreatedAt

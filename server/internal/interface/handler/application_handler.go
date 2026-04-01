@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"recruitment/internal/domain/entity"
 	domainErrs "recruitment/internal/domain/errors"
 	"recruitment/internal/usecase/application"
 
@@ -83,6 +84,18 @@ func (h *ApplicationHandler) Apply(c *gin.Context) {
 
 	userID := userIDRaw.(uint)
 
+	userRoleRaw, exists := c.Get("userRole")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userRole, ok := userRoleRaw.(entity.UserRole)
+	if !ok || userRole != entity.RoleCandidate {
+		c.JSON(http.StatusForbidden, gin.H{"error": domainErrs.ErrForbidden.Error()})
+		return
+	}
+
 	res, err := h.applyUC.Execute(c.Request.Context(), uint(jobID), userID)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
@@ -125,6 +138,18 @@ func (h *ApplicationHandler) ListMine(c *gin.Context) {
 	}
 
 	userID := userIDRaw.(uint)
+
+	userRoleRaw, exists := c.Get("userRole")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userRole, ok := userRoleRaw.(entity.UserRole)
+	if !ok || userRole != entity.RoleCandidate {
+		c.JSON(http.StatusForbidden, gin.H{"error": domainErrs.ErrForbidden.Error()})
+		return
+	}
 
 	res, err := h.listAppUC.Execute(c.Request.Context(), userID)
 	if err != nil {
