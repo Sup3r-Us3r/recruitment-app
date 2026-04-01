@@ -5,6 +5,7 @@ import (
 	"recruitment/internal/interface/handler"
 	"recruitment/internal/interface/middleware"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/watchakorn-18k/scalar-go"
 )
@@ -16,6 +17,14 @@ func SetupRouter(
 	jwtService auth.JWTService,
 ) *gin.Engine {
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// Expose swagger.json for Scalar to fetch
 	r.StaticFile("/docs/swagger.json", "./docs/swagger.json")
