@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/auth-context';
 import { registerSchema, type RegisterSchema } from './schema';
 import { toast } from 'sonner';
@@ -22,12 +23,16 @@ const useRegister = () => {
     },
   });
 
-  const isLoading = form.formState.isSubmitting;
+  const registerMutation = useMutation({
+    mutationFn: register,
+  });
+
+  const isLoading = form.formState.isSubmitting || registerMutation.isPending;
 
   const onSubmit = async (data: RegisterSchema) => {
     setErrorMsg(null);
     try {
-      await register({
+      await registerMutation.mutateAsync({
         email: data.email,
         password: data.password,
         role: data.role,

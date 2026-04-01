@@ -1,29 +1,27 @@
-import { useState, useEffect } from 'react'
-import { listMyApplications } from '@/http/recruitment-api/applications'
-import type { ApplicationResponse } from '@/http/recruitment-api/applications/types'
-import { toast } from 'sonner'
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { listMyApplications } from '@/http/recruitment-api/applications';
+import { toast } from 'sonner';
 
 const useMyApplications = () => {
-  const [applications, setApplications] = useState<ApplicationResponse[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchApplications = async () => {
-    setIsLoading(true)
-    try {
-      const data = await listMyApplications()
-      setApplications(data || [])
-    } catch {
-      toast.error('Erro ao buscar candidaturas', { description: 'Não foi possível carregar as vagas nas quais você se candidatou.' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const applicationsQuery = useQuery({
+    queryKey: ['applications', 'mine'],
+    queryFn: listMyApplications,
+  });
 
   useEffect(() => {
-    fetchApplications()
-  }, [])
+    if (applicationsQuery.isError) {
+      toast.error('Erro ao buscar candidaturas', {
+        description:
+          'Não foi possível carregar as vagas nas quais você se candidatou.',
+      });
+    }
+  }, [applicationsQuery.isError]);
 
-  return { applications, isLoading }
-}
+  return {
+    applications: applicationsQuery.data ?? [],
+    isLoading: applicationsQuery.isLoading,
+  };
+};
 
-export { useMyApplications }
+export { useMyApplications };

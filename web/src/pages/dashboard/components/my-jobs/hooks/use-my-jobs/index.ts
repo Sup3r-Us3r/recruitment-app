@@ -1,29 +1,26 @@
-import { useState, useEffect } from 'react'
-import { listMyJobs } from '@/http/recruitment-api/jobs'
-import type { JobResponse } from '@/http/recruitment-api/jobs/types'
-import { toast } from 'sonner'
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { listMyJobs } from '@/http/recruitment-api/jobs';
+import { toast } from 'sonner';
 
 const useMyJobs = () => {
-  const [jobs, setJobs] = useState<JobResponse[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchJobs = async () => {
-    setIsLoading(true)
-    try {
-      const data = await listMyJobs()
-      setJobs(data || [])
-    } catch {
-      toast.error('Erro ao buscar vagas', { description: 'Não foi possível carregar suas vagas criadas.' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const jobsQuery = useQuery({
+    queryKey: ['jobs', 'mine'],
+    queryFn: listMyJobs,
+  });
 
   useEffect(() => {
-    fetchJobs()
-  }, [])
+    if (jobsQuery.isError) {
+      toast.error('Erro ao buscar vagas', {
+        description: 'Não foi possível carregar suas vagas criadas.',
+      });
+    }
+  }, [jobsQuery.isError]);
 
-  return { jobs, isLoading }
-}
+  return {
+    jobs: jobsQuery.data ?? [],
+    isLoading: jobsQuery.isLoading,
+  };
+};
 
-export { useMyJobs }
+export { useMyJobs };
