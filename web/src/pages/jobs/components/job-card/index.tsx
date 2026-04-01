@@ -14,9 +14,14 @@ import type { JobResponse } from '@/http/recruitment-api/jobs/types';
 interface JobCardProps {
   job: JobResponse;
   initialHasApplied?: boolean;
+  onSelectJob?: (job: JobResponse) => void;
 }
 
-const JobCard = ({ job, initialHasApplied = false }: JobCardProps) => {
+const JobCard = ({
+  job,
+  initialHasApplied = false,
+  onSelectJob,
+}: JobCardProps) => {
   const { isOwner, hasApplied, isApplying, isRecruiter, handleApply } =
     useJobCard({
       jobId: job.id,
@@ -29,7 +34,10 @@ const JobCard = ({ job, initialHasApplied = false }: JobCardProps) => {
   const formattedDate = dateObj.toLocaleDateString('pt-BR');
 
   return (
-    <Card className="flex flex-col h-full transition-all duration-200 hover:shadow-md hover:border-primary/20">
+    <Card
+      className="flex flex-col h-full transition-all duration-200 hover:shadow-md hover:border-primary/20 cursor-pointer"
+      onClick={() => onSelectJob?.(job)}
+    >
       <CardHeader>
         <div className="flex justify-between items-start gap-4">
           <CardTitle className="text-lg line-clamp-2 leading-tight flex-1">
@@ -81,7 +89,10 @@ const JobCard = ({ job, initialHasApplied = false }: JobCardProps) => {
         ) : (
           <Button
             className="w-full transition-all duration-200 cursor-pointer"
-            onClick={handleApply}
+            onClick={(event) => {
+              event.stopPropagation();
+              void handleApply();
+            }}
             disabled={isApplying}
           >
             {isApplying ? 'Enviando...' : 'Candidatar-se'}
