@@ -17,13 +17,21 @@ interface JobFiltersProps {
   availableLabels: string[];
 }
 
-const workModeOptions: { value: WorkMode; label: string; icon: typeof Building2 }[] = [
+const workModeOptions: {
+  value: WorkMode;
+  label: string;
+  icon: typeof Building2;
+}[] = [
   { value: 'on_site', label: 'Presencial', icon: Building2 },
   { value: 'hybrid', label: 'Híbrido', icon: Home },
   { value: 'remote', label: 'Remoto', icon: Laptop },
 ];
 
-const JobFilters = ({ filters, onFiltersChange, availableLabels }: JobFiltersProps) => {
+const JobFilters = ({
+  filters,
+  onFiltersChange,
+  availableLabels,
+}: JobFiltersProps) => {
   const [open, setOpen] = useState(false);
 
   const activeCount = filters.workModes.length + filters.labels.length;
@@ -47,18 +55,27 @@ const JobFilters = ({ filters, onFiltersChange, availableLabels }: JobFiltersPro
   };
 
   const removeWorkMode = (mode: WorkMode) => {
-    onFiltersChange({ ...filters, workModes: filters.workModes.filter((m) => m !== mode) });
+    onFiltersChange({
+      ...filters,
+      workModes: filters.workModes.filter((m) => m !== mode),
+    });
   };
 
   const removeLabel = (label: string) => {
-    onFiltersChange({ ...filters, labels: filters.labels.filter((l) => l !== label) });
+    onFiltersChange({
+      ...filters,
+      labels: filters.labels.filter((l) => l !== label),
+    });
   };
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="h-12 gap-2 cursor-pointer shrink-0">
+        <PopoverTrigger>
+          <Button
+            variant="outline"
+            className="h-12 gap-2 cursor-pointer shrink-0"
+          >
             <SlidersHorizontal className="size-4" />
             Filtros
             {activeCount > 0 && (

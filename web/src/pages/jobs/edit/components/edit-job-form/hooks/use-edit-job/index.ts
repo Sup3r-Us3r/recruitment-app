@@ -14,7 +14,11 @@ const useEditJob = () => {
   const queryClient = useQueryClient();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const { data: job, isLoading: isLoadingJob, isSuccess } = useQuery({
+  const {
+    data: job,
+    isLoading: isLoadingJob,
+    isSuccess,
+  } = useQuery({
     queryKey: ['jobs', jobId],
     queryFn: () => getJob(jobId),
     enabled: !!jobId,
@@ -32,7 +36,14 @@ const useEditJob = () => {
           labels: job.labels ?? [],
         }
       : undefined,
-    defaultValues: { title: '', description: '', company: '', location: '', work_mode: 'on_site', labels: [] },
+    defaultValues: {
+      title: '',
+      description: '',
+      company: '',
+      location: '',
+      work_mode: 'on_site',
+      labels: [],
+    },
   });
 
   const updateJobMutation = useMutation({
@@ -48,11 +59,19 @@ const useEditJob = () => {
 
       navigate('/dashboard');
     },
-    onError: (error: any) => {
-      if (error?.response?.status === 403) {
+    onError: (error: unknown) => {
+      const hasResponse =
+        typeof error === 'object' && error !== null && 'response' in error;
+
+      if (
+        hasResponse &&
+        (error as { response?: { status?: number } }).response?.status === 403
+      ) {
         setErrorMsg('Você não tem permissão para editar esta vaga.');
       } else {
-        setErrorMsg('Ocorreu um erro ao atualizar a vaga. Tente novamente mais tarde.');
+        setErrorMsg(
+          'Ocorreu um erro ao atualizar a vaga. Tente novamente mais tarde.',
+        );
       }
       toast.error('Falha ao atualizar vaga');
     },
@@ -69,7 +88,14 @@ const useEditJob = () => {
     navigate('/dashboard');
   };
 
-  return { form, isLoading, isLoadingJob: isLoadingJob || !isSuccess, onSubmit, errorMsg, handleCancel };
+  return {
+    form,
+    isLoading,
+    isLoadingJob: isLoadingJob || !isSuccess,
+    onSubmit,
+    errorMsg,
+    handleCancel,
+  };
 };
 
 export { useEditJob };
