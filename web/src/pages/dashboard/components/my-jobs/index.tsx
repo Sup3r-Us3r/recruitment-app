@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { useMyJobs } from './hooks/use-my-jobs'
 import { JobCard } from '@/pages/jobs/components/job-card'
+import { JobDetailsDialog } from '@/pages/jobs/components/job-details-dialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Briefcase, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import type { JobResponse } from '@/http/recruitment-api/jobs/types'
 
 const MyJobs = () => {
   const { jobs, isLoading } = useMyJobs()
+  const [selectedJob, setSelectedJob] = useState<JobResponse | null>(null)
 
   if (isLoading) {
     return (
@@ -49,10 +53,22 @@ const MyJobs = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} initialHasApplied={false} />
+            <JobCard
+              key={job.id}
+              job={job}
+              initialHasApplied={false}
+              showEditButton
+              onSelectJob={setSelectedJob}
+            />
           ))}
         </div>
       )}
+
+      <JobDetailsDialog
+        job={selectedJob}
+        open={Boolean(selectedJob)}
+        onOpenChange={(open) => { if (!open) setSelectedJob(null) }}
+      />
     </div>
   )
 }

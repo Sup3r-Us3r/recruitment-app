@@ -11,4 +11,8 @@ async function applyToJob(jobId: number): Promise<ApplicationResponse> {
   return response.data
 }
 
-export { listMyApplications, applyToJob }
+async function withdrawApplication(jobId: number): Promise<void> {
+  await apiClient.delete(`/jobs/${jobId}/apply`)
+}
+
+export { listMyApplications, applyToJob, withdrawApplication }

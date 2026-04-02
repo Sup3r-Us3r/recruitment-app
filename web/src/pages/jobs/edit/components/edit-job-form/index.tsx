@@ -1,8 +1,9 @@
-import { useCreateJob } from './hooks/use-create-job'
+import { useEditJob } from './hooks/use-edit-job'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { TagInput } from '@/components/ui/tag-input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { AlertCircle, Building2, Home, Laptop } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -13,8 +14,19 @@ const workModeOptions = [
   { value: 'remote', label: 'Remoto', icon: Laptop },
 ] as const
 
-const CreateJobForm = () => {
-  const { form, isLoading, onSubmit, errorMsg, handleCancel } = useCreateJob()
+const EditJobForm = () => {
+  const { form, isLoading, isLoadingJob, onSubmit, errorMsg, handleCancel } = useEditJob()
+
+  if (isLoadingJob) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    )
+  }
 
   return (
     <Form {...form}>
@@ -150,7 +162,7 @@ const CreateJobForm = () => {
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Publicando...' : 'Publicar Vaga'}
+            {isLoading ? 'Salvando...' : 'Salvar Alterações'}
           </Button>
         </div>
       </form>
@@ -158,4 +170,4 @@ const CreateJobForm = () => {
   )
 }
 
-export { CreateJobForm }
+export { EditJobForm }

@@ -10,6 +10,7 @@ import { Register } from '@/pages/auth/register';
 import { Jobs } from '@/pages/jobs';
 import { Dashboard } from '@/pages/dashboard';
 import { CreateJob } from '@/pages/jobs/create';
+import { EditJob } from '@/pages/jobs/edit';
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
 
           <Route element={<ProtectedRoute allowedRoles={['recruiter']} />}>
             <Route path="/jobs/create" element={<CreateJob />} />
+            <Route path="/jobs/:id/edit" element={<EditJob />} />
           </Route>
         </Routes>
         <Toaster richColors position="bottom-right" />

@@ -10,7 +10,7 @@ const JobSearch = ({ onSearch }: JobSearchProps) => {
   const { searchTerm, setSearchTerm } = useJobSearch({ onSearch })
 
   return (
-    <div className="relative max-w-md w-full mb-8">
+    <div className="relative flex-1 min-w-0">
       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
         <Search className="h-4 w-4 text-muted-foreground" />
       </div>

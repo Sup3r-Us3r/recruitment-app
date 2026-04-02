@@ -1,6 +1,6 @@
 import { useMyApplications } from './hooks/use-my-applications';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Inbox, ExternalLink, CalendarDays } from 'lucide-react';
+import { Inbox, ExternalLink, CalendarDays, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import {
@@ -11,6 +11,36 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import type { ApplicationResponse } from '@/http/recruitment-api/applications/types';
+
+function getStatusBadge(app: ApplicationResponse) {
+  // Application was canceled (either by user or job was closed)
+  if (app.canceled_at) {
+    // Job was closed — that's why the application was canceled
+    if (app.job?.canceled_at) {
+      return (
+        <Badge variant="destructive" className="shrink-0 text-xs">
+          Vaga encerrada
+        </Badge>
+      );
+    }
+    // User canceled their own application
+    return (
+      <Badge variant="outline" className="shrink-0 text-xs text-muted-foreground">
+        Cancelada
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge
+      variant="secondary"
+      className="bg-green-100 text-green-800 shrink-0 text-xs"
+    >
+      Enviada
+    </Badge>
+  );
+}
 
 const MyApplications = () => {
   const { applications, isLoading } = useMyApplications();
@@ -48,20 +78,32 @@ const MyApplications = () => {
       {applications.map((app) => {
         const dateObj = new Date(app.created_at);
         const formattedDate = dateObj.toLocaleDateString('pt-BR');
+        const isCanceled = !!app.canceled_at;
 
         return (
-          <Card key={app.id} className="flex flex-col bg-muted/30">
+          <Card
+            key={app.id}
+            className={`flex flex-col ${isCanceled ? 'opacity-60 border-dashed' : 'bg-muted/30'}`}
+          >
             <CardHeader className="pb-3">
-              <div className="flex justify-between items-start gap-4">
-                <CardTitle className="text-base line-clamp-2">
-                  {app.job?.title || `Vaga #${app.job_id}`}
-                </CardTitle>
-                <Badge
-                  variant="secondary"
-                  className="bg-green-100 text-green-800 shrink-0"
-                >
-                  Enviada
-                </Badge>
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base line-clamp-2">
+                    {app.job?.title || `Vaga #${app.job_id}`}
+                  </CardTitle>
+                  {app.job?.company && (
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {app.job.company}
+                      {app.job.location && (
+                        <span className="inline-flex items-center gap-0.5 ml-1.5">
+                          <MapPin className="size-3" />
+                          {app.job.location}
+                        </span>
+                      )}
+                    </p>
+                  )}
+                </div>
+                {getStatusBadge(app)}
               </div>
             </CardHeader>
             <CardContent className="flex-1 pb-3">

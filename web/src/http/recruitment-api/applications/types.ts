@@ -9,6 +9,7 @@ export interface ApplicationResponse {
   id: number
   job_id: number
   user_id: number
+  canceled_at: string | null
   created_at: string
   job?: JobResponse
   user?: UserResponse

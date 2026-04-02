@@ -37,6 +37,7 @@ const decodeUserFromToken = (token: string): UserResponse => {
 
   return {
     id: decoded.user_id,
+    name: decoded.name,
     email: decoded.email,
     role: decoded.role,
   };

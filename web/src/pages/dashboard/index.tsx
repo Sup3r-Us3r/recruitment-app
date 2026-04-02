@@ -17,7 +17,7 @@ const Dashboard = () => {
               Painel de Controle
             </h1>
             <p className="text-muted-foreground text-lg">
-              Bem-vindo(a), {user?.email}
+              Bem-vindo(a), {user?.name || user?.email}
             </p>
           </div>
 

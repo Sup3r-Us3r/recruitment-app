@@ -16,6 +16,7 @@ const useRegister = () => {
   const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
       role: 'candidate',
@@ -33,6 +34,7 @@ const useRegister = () => {
     setErrorMsg(null);
     try {
       await registerMutation.mutateAsync({
+        name: data.name,
         email: data.email,
         password: data.password,
         role: data.role,

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const createJobSchema = z.object({
+const editJobSchema = z.object({
   title: z.string().min(3, 'O título deve ter pelo menos 3 caracteres'),
   description: z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres'),
   company: z.string().min(2, 'O nome da empresa é obrigatório'),
@@ -11,7 +11,7 @@ const createJobSchema = z.object({
   labels: z.array(z.string()).default([]),
 })
 
-type CreateJobSchema = z.infer<typeof createJobSchema>
+type EditJobSchema = z.infer<typeof editJobSchema>
 
-export { createJobSchema }
-export type { CreateJobSchema }
+export { editJobSchema }
+export type { EditJobSchema }

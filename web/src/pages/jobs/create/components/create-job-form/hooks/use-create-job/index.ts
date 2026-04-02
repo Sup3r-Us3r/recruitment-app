@@ -14,7 +14,7 @@ const useCreateJob = () => {
 
   const form = useForm<CreateJobSchema>({
     resolver: zodResolver(createJobSchema),
-    defaultValues: { title: '', description: '', location: '' },
+    defaultValues: { title: '', description: '', company: '', location: '', work_mode: 'on_site', labels: [] },
   });
 
   const createJobMutation = useMutation({

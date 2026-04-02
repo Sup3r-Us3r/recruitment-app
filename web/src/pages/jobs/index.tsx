@@ -1,14 +1,29 @@
 import { Navbar } from '@/components/navbar';
 import { JobSearch } from './components/job-search';
+import { JobFilters } from './components/job-filters';
 import { JobList } from './components/job-list';
 import { useJobList } from './components/job-list/hooks/use-job-list';
 import { JobDetailsDialog } from './components/job-details-dialog';
+import { listLabels } from '@/http/recruitment-api/jobs';
 import type { JobResponse } from '@/http/recruitment-api/jobs/types';
+import type { WorkMode } from '@/http/recruitment-api/jobs/types';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+export interface JobFiltersState {
+  workModes: WorkMode[];
+  labels: string[];
+}
 
 const Jobs = () => {
-  const { jobs, appliedJobIds, isLoading, fetchJobs } = useJobList();
+  const [filters, setFilters] = useState<JobFiltersState>({ workModes: [], labels: [] });
+  const { jobs, appliedJobIds, isLoading, fetchJobs } = useJobList(filters);
   const [selectedJob, setSelectedJob] = useState<JobResponse | null>(null);
+
+  const { data: availableLabels = [] } = useQuery({
+    queryKey: ['jobs', 'labels'],
+    queryFn: listLabels,
+  });
 
   const handleSearch = (search: string) => {
     fetchJobs(search);
@@ -39,7 +54,14 @@ const Jobs = () => {
             </p>
           </div>
 
-          <JobSearch onSearch={handleSearch} />
+          <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <JobSearch onSearch={handleSearch} />
+            <JobFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              availableLabels={availableLabels}
+            />
+          </div>
 
           <JobList
             jobs={jobs}
