@@ -42,7 +42,7 @@ func (uc *LoginUseCase) Execute(ctx context.Context, input LoginInput) (*LoginOu
 		return nil, domainErrs.ErrInvalidCredentials
 	}
 
-	token, err := uc.jwtService.GenerateToken(user.ID, user.Email, user.Role)
+	token, err := uc.jwtService.GenerateToken(user.ID, user.Name, user.Email, user.Role)
 	if err != nil {
 		return nil, err
 	}

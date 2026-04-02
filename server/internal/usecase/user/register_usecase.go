@@ -20,6 +20,7 @@ func NewRegisterUseCase(repo repository.UserRepository) *RegisterUseCase {
 }
 
 type RegisterInput struct {
+	Name     string `json:"name" binding:"required,min=2"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 	Role     string `json:"role" binding:"required,oneof=candidate recruiter"`
@@ -40,6 +41,7 @@ func (uc *RegisterUseCase) Execute(ctx context.Context, input RegisterInput) (*e
 	}
 
 	user := &entity.User{
+		Name:         input.Name,
 		Email:        input.Email,
 		PasswordHash: string(hashedPassword),
 		Role:         entity.UserRole(input.Role),

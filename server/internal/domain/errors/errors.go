@@ -10,4 +10,5 @@ var (
 	ErrJobNotFound          = errors.New("job not found")
 	ErrDuplicateApplication = errors.New("already applied to this job")
 	ErrCannotApplyOwnJob    = errors.New("cannot apply to your own job")
+	ErrApplicationNotFound  = errors.New("application not found")
 )

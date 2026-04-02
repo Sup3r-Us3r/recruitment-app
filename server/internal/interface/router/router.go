@@ -49,30 +49,32 @@ func SetupRouter(
 
 	v1 := r.Group("/api/v1")
 
-	// Públicas
 	authGroup := v1.Group("/auth")
 	{
 		authGroup.POST("/register", userHandler.Register)
 		authGroup.POST("/login", userHandler.Login)
 	}
 
-	// Mistas (GET público, POST protegido)
 	jobsGroup := v1.Group("/jobs")
 	{
-		// Públicas
 		jobsGroup.GET("", jobHandler.List)
+		jobsGroup.GET("/labels", jobHandler.ListLabels)
+		jobsGroup.GET("/:id", jobHandler.GetByID)
 
-		// Protegidas
+		// Protected
 		protectedJobs := jobsGroup.Group("")
 		protectedJobs.Use(middleware.AuthMiddleware(jwtService))
 		{
 			protectedJobs.POST("", jobHandler.Create)
+			protectedJobs.PUT("/:id", jobHandler.Update)
+			protectedJobs.POST("/:id/cancel", jobHandler.Cancel)
+			protectedJobs.GET("/:id/applicants", jobHandler.ListApplicants)
 			protectedJobs.GET("/mine", jobHandler.ListMine)
 			protectedJobs.POST("/:id/apply", appHandler.Apply)
+			protectedJobs.DELETE("/:id/apply", appHandler.Withdraw)
 		}
 	}
 
-	// Protegidas completas
 	appGroup := v1.Group("/applications")
 	appGroup.Use(middleware.AuthMiddleware(jwtService))
 	{

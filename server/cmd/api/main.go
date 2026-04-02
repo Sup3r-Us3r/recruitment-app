@@ -61,16 +61,21 @@ func main() {
 	loginUC := user.NewLoginUseCase(userRepo, jwtService)
 
 	createJobUC := job.NewCreateJobUseCase(jobRepo)
+	updateJobUC := job.NewUpdateJobUseCase(jobRepo)
+	cancelJobUC := job.NewCancelJobUseCase(jobRepo, appRepo)
+	getJobUC := job.NewGetJobUseCase(jobRepo, appRepo)
+	listApplicantsUC := job.NewListApplicantsUseCase(jobRepo, appRepo)
 	searchJobsUC := job.NewSearchJobsUseCase(jobRepo)
 	listJobsUC := job.NewListJobsUseCase(jobRepo)
 
 	applyUC := application.NewApplyUseCase(appRepo, jobRepo)
+	withdrawUC := application.NewWithdrawUseCase(appRepo)
 	listAppsUC := application.NewListMyApplicationsUseCase(appRepo)
 
 	// Handlers
 	userHandler := handler.NewUserHandler(registerUC, loginUC)
-	jobHandler := handler.NewJobHandler(createJobUC, searchJobsUC, listJobsUC)
-	appHandler := handler.NewApplicationHandler(applyUC, listAppsUC)
+	jobHandler := handler.NewJobHandler(createJobUC, updateJobUC, cancelJobUC, getJobUC, searchJobsUC, listJobsUC, listApplicantsUC, jobRepo)
+	appHandler := handler.NewApplicationHandler(applyUC, withdrawUC, listAppsUC)
 
 	// Router
 	r := router.SetupRouter(userHandler, jobHandler, appHandler, jwtService)

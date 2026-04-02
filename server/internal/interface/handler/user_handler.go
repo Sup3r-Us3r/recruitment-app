@@ -67,6 +67,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"id":         res.ID,
+		"name":       res.Name,
 		"email":      res.Email,
 		"role":       res.Role,
 		"created_at": res.CreatedAt,

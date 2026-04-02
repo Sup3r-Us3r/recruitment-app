@@ -15,6 +15,6 @@ func NewSearchJobsUseCase(repo repository.JobRepository) *SearchJobsUseCase {
 	return &SearchJobsUseCase{jobRepo: repo}
 }
 
-func (uc *SearchJobsUseCase) Execute(ctx context.Context, search string) ([]entity.Job, error) {
-	return uc.jobRepo.ListAll(ctx, search)
+func (uc *SearchJobsUseCase) Execute(ctx context.Context, filter repository.JobFilter) ([]entity.Job, error) {
+	return uc.jobRepo.ListAll(ctx, filter)
 }

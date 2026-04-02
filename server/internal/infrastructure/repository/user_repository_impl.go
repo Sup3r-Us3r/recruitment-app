@@ -24,6 +24,7 @@ func NewUserRepository(db *gorm.DB) repository.UserRepository {
 func toUserEntity(m model.UserModel) *entity.User {
 	return &entity.User{
 		ID:           m.ID,
+		Name:         m.Name,
 		Email:        m.Email,
 		PasswordHash: m.PasswordHash,
 		Role:         entity.UserRole(m.Role),
@@ -33,6 +34,7 @@ func toUserEntity(m model.UserModel) *entity.User {
 
 func toUserModel(e *entity.User) *model.UserModel {
 	m := &model.UserModel{
+		Name:         e.Name,
 		Email:        e.Email,
 		PasswordHash: e.PasswordHash,
 		Role:         string(e.Role),

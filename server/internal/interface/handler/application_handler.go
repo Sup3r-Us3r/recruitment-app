@@ -14,8 +14,9 @@ import (
 )
 
 type ApplicationHandler struct {
-	applyUC   *application.ApplyUseCase
-	listAppUC *application.ListMyApplicationsUseCase
+	applyUC    *application.ApplyUseCase
+	withdrawUC *application.WithdrawUseCase
+	listAppUC  *application.ListMyApplicationsUseCase
 }
 
 // UserResponse represents the user data in applications.
@@ -27,28 +28,32 @@ type UserResponse struct {
 
 // JobResponse represents the job data in applications.
 type JobResponse struct {
-	ID          uint      `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Location    string    `json:"location"`
-	OwnerID     uint      `json:"owner_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          uint       `json:"id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Company     string     `json:"company"`
+	Location    string     `json:"location"`
+	CanceledAt  *time.Time `json:"canceled_at"`
+	OwnerID     uint       `json:"owner_id"`
+	CreatedAt   time.Time  `json:"created_at"`
 }
 
 // ApplicationResponse represents a single application.
 type ApplicationResponse struct {
-	ID        uint          `json:"id"`
-	JobID     uint          `json:"job_id"`
-	UserID    uint          `json:"user_id"`
-	Job       *JobResponse  `json:"job,omitempty"`
-	User      *UserResponse `json:"user,omitempty"`
-	CreatedAt time.Time     `json:"created_at"`
+	ID         uint          `json:"id"`
+	JobID      uint          `json:"job_id"`
+	UserID     uint          `json:"user_id"`
+	Job        *JobResponse  `json:"job,omitempty"`
+	User       *UserResponse `json:"user,omitempty"`
+	CanceledAt *time.Time    `json:"canceled_at"`
+	CreatedAt  time.Time     `json:"created_at"`
 }
 
-func NewApplicationHandler(applyUC *application.ApplyUseCase, listAppUC *application.ListMyApplicationsUseCase) *ApplicationHandler {
+func NewApplicationHandler(applyUC *application.ApplyUseCase, withdrawUC *application.WithdrawUseCase, listAppUC *application.ListMyApplicationsUseCase) *ApplicationHandler {
 	return &ApplicationHandler{
-		applyUC:   applyUC,
-		listAppUC: listAppUC,
+		applyUC:    applyUC,
+		withdrawUC: withdrawUC,
+		listAppUC:  listAppUC,
 	}
 }
 
@@ -160,10 +165,11 @@ func (h *ApplicationHandler) ListMine(c *gin.Context) {
 	output := make([]ApplicationResponse, 0, len(res))
 	for _, a := range res {
 		appRes := ApplicationResponse{
-			ID:        a.ID,
-			JobID:     a.JobID,
-			UserID:    a.UserID,
-			CreatedAt: a.CreatedAt,
+			ID:         a.ID,
+			JobID:      a.JobID,
+			UserID:     a.UserID,
+			CanceledAt: a.CanceledAt,
+			CreatedAt:  a.CreatedAt,
 		}
 
 		if a.Job != nil {
@@ -171,7 +177,9 @@ func (h *ApplicationHandler) ListMine(c *gin.Context) {
 				ID:          a.Job.ID,
 				Title:       a.Job.Title,
 				Description: a.Job.Description,
+				Company:     a.Job.Company,
 				Location:    a.Job.Location,
+				CanceledAt:  a.Job.CanceledAt,
 				OwnerID:     a.Job.OwnerID,
 				CreatedAt:   a.Job.CreatedAt,
 			}
@@ -189,4 +197,59 @@ func (h *ApplicationHandler) ListMine(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, output)
+}
+
+// Withdraw godoc
+// @Summary Withdraw application
+// @Description Allows the authenticated candidate to withdraw their application from a job
+// @Tags applications
+// @Produce json
+// @Param id path string true "Job ID"
+// @Security ApiKeyAuth
+// @Success 204 "No Content"
+// @Failure 400 {object} map[string]string "Invalid job ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Failure 404 {object} map[string]string "Application not found"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/jobs/{id}/apply [delete]
+func (h *ApplicationHandler) Withdraw(c *gin.Context) {
+	jobIDParam := c.Param("id")
+	jobID, err := strconv.ParseUint(jobIDParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	userIDRaw, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userID := userIDRaw.(uint)
+
+	userRoleRaw, exists := c.Get("userRole")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userRole, ok := userRoleRaw.(entity.UserRole)
+	if !ok || userRole != entity.RoleCandidate {
+		c.JSON(http.StatusForbidden, gin.H{"error": domainErrs.ErrForbidden.Error()})
+		return
+	}
+
+	err = h.withdrawUC.Execute(c.Request.Context(), uint(jobID), userID)
+	if err != nil {
+		if errors.Is(err, domainErrs.ErrApplicationNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

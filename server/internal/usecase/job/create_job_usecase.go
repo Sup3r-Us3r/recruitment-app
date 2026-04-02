@@ -16,17 +16,28 @@ func NewCreateJobUseCase(repo repository.JobRepository) *CreateJobUseCase {
 }
 
 type CreateJobInput struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Location    string `json:"location"`
-	OwnerID     uint   `json:"-"`
+	Title       string   `json:"title" binding:"required"`
+	Description string   `json:"description" binding:"required"`
+	Company     string   `json:"company"`
+	Location    string   `json:"location"`
+	WorkMode    string   `json:"work_mode" binding:"required,oneof=on_site remote hybrid"`
+	Labels      []string `json:"labels"`
+	OwnerID     uint     `json:"-"`
 }
 
 func (uc *CreateJobUseCase) Execute(ctx context.Context, input CreateJobInput) (*entity.Job, error) {
+	labels := input.Labels
+	if labels == nil {
+		labels = []string{}
+	}
+
 	job := &entity.Job{
 		Title:       input.Title,
 		Description: input.Description,
+		Company:     input.Company,
 		Location:    input.Location,
+		WorkMode:    entity.WorkMode(input.WorkMode),
+		Labels:      labels,
 		OwnerID:     input.OwnerID,
 	}
 

@@ -10,7 +10,7 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(userID uint, email string, role entity.UserRole) (string, error)
+	GenerateToken(userID uint, name string, email string, role entity.UserRole) (string, error)
 	ValidateToken(tokenString string) (*AuthClaims, error)
 }
 
@@ -26,6 +26,7 @@ func NewJWTService(secret string) JWTService {
 
 type authClaims struct {
 	UserID uint   `json:"user_id"`
+	Name   string `json:"name"`
 	Email  string `json:"email"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
@@ -33,13 +34,15 @@ type authClaims struct {
 
 type AuthClaims struct {
 	UserID uint
+	Name   string
 	Email  string
 	Role   entity.UserRole
 }
 
-func (j *jwtService) GenerateToken(userID uint, email string, role entity.UserRole) (string, error) {
+func (j *jwtService) GenerateToken(userID uint, name string, email string, role entity.UserRole) (string, error) {
 	claims := &authClaims{
 		UserID: userID,
+		Name:   name,
 		Email:  email,
 		Role:   string(role),
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -67,6 +70,7 @@ func (j *jwtService) ValidateToken(tokenString string) (*AuthClaims, error) {
 	if claims, ok := token.Claims.(*authClaims); ok && token.Valid {
 		return &AuthClaims{
 			UserID: claims.UserID,
+			Name:   claims.Name,
 			Email:  claims.Email,
 			Role:   entity.UserRole(claims.Role),
 		}, nil
